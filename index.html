@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronómetro de Clasificaciones Sincronizado</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --primary-dark: #1a237e;
+            --primary-light: #283593;
+            --accent-green: #00C853;
+            --accent-green-dark: #4CAF50;
+            --accent-blue: #2196F3;
+            --accent-red: #f44336;
+            --accent-orange: #FF9800;
+            --accent-yellow: #FFC107;
+            --text-light: #ffffff;
+            --text-muted: #b0bec5;
+            --bg-overlay: rgba(0, 0, 0, 0.8);
+            --border-light: rgba(255, 255, 255, 0.15);
+            --success-bg: rgba(76, 175, 80, 0.2);
+            --danger-bg: rgba(244, 67, 54, 0.2);
+            --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.5);
+            --shadow-medium: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            background: var(--bg-overlay);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid var(--border-light);
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent-yellow), var(--accent-orange), var(--accent-red));
+            border-radius: 24px 24px 0 0;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: var(--accent-yellow);
+            text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .config-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .config-title {
+            color: var(--accent-yellow);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .time-inputs-horizontal {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: nowrap;
+            margin-bottom: 1rem;
+        }
+
+        .time-group-horizontal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            max-width: 120px;
+        }
+
+        .time-group-horizontal label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-yellow);
+            white-space: nowrap;
+        }
+
+        .time-group-horizontal input {
+            padding: 0.8rem 1rem;
+            font-size: 1.8rem;
+            border-radius: 12px;
+            border: 2px solid var(--border-light);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 100%;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .time-group-horizontal input:focus {
+            outline: none;
+            border-color: var(--accent-yellow);
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+        }
+
+        .time-group-horizontal input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .time-separator {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-yellow);
+            margin: 0 5px;
+            align-self: center;
+            line-height: 1;
+        }
+
+        .total-time {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-container {
+            margin: 1.5rem 0;
+        }
+
+        .phase-indicator {
+            font-size: 1.8rem;
+            font-weight: 700;
+            padding: 1rem;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            margin-bottom: 1.5rem;
+        }
+
+        .en-ejecucion {
+            background: var(--success-bg);
+            border-color: var(--accent-green);
+            color: #c8e6c9;
+        }
+
+        .detenido {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--border-light);
+        }
+
+        .timer-display {
+            font-size: 7rem;
+            font-weight: 900;
+            margin: 1rem 0;
+            text-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 6px;
+            line-height: 1;
+            transition: all 0.3s;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tiempo-critico {
+            color: var(--accent-red) !important;
+            animation: pulse 1s infinite alternate;
+            text-shadow: 0 0 50px rgba(244, 67, 54, 0.8) !important;
+        }
+
+        .tiempo-alerta {
+            color: var(--accent-orange) !important;
+            text-shadow: 0 0 40px rgba(255, 152, 0, 0.8) !important;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.03); opacity: 0.9; }
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+            width: 100%;
+            transition: width 1s linear;
+            border-radius: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 2.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1.3rem 2.6rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 180px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark));
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 200, 83, 0.3);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, var(--accent-red), #d32f2f);
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-stop:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, var(--accent-blue), #1976D2);
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-reset:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .audio-warning {
+            background: var(--danger-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 2rem; }
+            h1 { font-size: 2.2rem; }
+            .timer-display { font-size: 5rem; letter-spacing: 4px; }
+            .phase-indicator { font-size: 1.6rem; }
+            .btn { min-width: 160px; padding: 1.2rem 2.2rem; }
+            .time-inputs-horizontal { 
+                gap: 15px; 
+                flex-wrap: wrap;
+            }
+            .time-group-horizontal { 
+                max-width: 100px;
+                flex: 0 0 auto;
+            }
+            .time-group-horizontal input { 
+                font-size: 1.5rem;
+                padding: 0.6rem 0.8rem;
+            }
+            .time-separator { 
+                font-size: 1.5rem;
+                margin: 0 3px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 1.8rem; }
+            .timer-display { font-size: 3.5rem; letter-spacing: 3px; min-height: 100px; }
+            .btn { min-width: 100%; }
+            .controls { flex-direction: column; }
+            .time-inputs-horizontal { 
+                gap: 10px; 
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            .time-group-horizontal { 
+                max-width: 80px;
+            }
+            .time-group-horizontal input { 
+                font-size: 1.3rem;
+                padding: 0.5rem 0.6rem;
+            }
+            .time-separator { 
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-flag-checkered"></i> CRONÓMETRO DE CLASIFICACIONES</h1>
+        
+        <div class="config-panel">
+            <div class="config-title">
+                <i class="fas fa-clock"></i> CONFIGURAR TIEMPO
+            </div>
+            
+            <div class="time-inputs-horizontal">
+                <div class="time-group-horizontal">
+                    <label for="horasInput">Horas</label>
+                    <input type="number" id="horasInput" min="0" max="24" value="0" placeholder="0">
+                </div>
+                
+                <div class="time-separator">:</div>
+                
+                <div class="time-group-horizontal">
+                    <label for="minutosInput">Minutos</label>
+                    <input type="number" id="minutosInput" min="0" max="59" value="10" placeholder="10">
+                </div>
+                
+                <div class="time-separator">:</div>
+                
+                <div class="time-group-horizontal">
+                    <label for="segundosInput">Segundos</label>
+                    <input type="number" id="segundosInput" min="0" max="59" value="0" placeholder="0">
+                </div>
+            </div>
+            
+            <div class="total-time" id="totalTime">
+                Tiempo total: <span id="tiempoTotalTexto">10 minutos</span>
+            </div>
+        </div>
+        
+        <div class="status-container">
+            <div id="phaseIndicator" class="phase-indicator detenido">
+                <i class="fas fa-hourglass-start"></i> LISTO
+            </div>
+            
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            
+            <div id="timer" class="timer-display">10:00</div>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn" class="btn btn-start">
+                <i class="fas fa-play"></i> INICIAR
+            </button>
+            <button id="stopBtn" class="btn btn-stop" disabled>
+                <i class="fas fa-pause"></i> DETENER
+            </button>
+            <button id="resetBtn" class="btn btn-reset">
+                <i class="fas fa-redo"></i> REINICIAR
+            </button>
+        </div>
+        
+        <div class="audio-warning">
+            <i class="fas fa-volume-up"></i>
+            <div>
+                <strong>IMPORTANTE:</strong> Haz clic en la página antes de iniciar para activar el audio
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 🔥 CONFIGURACIÓN FIREBASE (REEMPLAZA ESTO)
+        // ============================================
+       // Import the functions you need from the SDKs you need
+
+import { initializeApp } from "firebase/app";
+
+// TODO: Add SDKs for Firebase products that you want to use
+
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+
+// Your web app's Firebase configuration
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyBYXblIyc9N5NqBCzL4R5d3AOwrwpy6NlA",
+
+  authDomain: "crono-clasificatoria.firebaseapp.com",
+
+  databaseURL: "https://crono-clasificatoria-default-rtdb.europe-west1.firebasedatabase.app",
+
+  projectId: "crono-clasificatoria",
+
+  storageBucket: "crono-clasificatoria.firebasestorage.app",
+
+  messagingSenderId: "913248573377",
+
+  appId: "1:913248573377:web:36b4d2ba5dccce08e08140"
+
+};
+
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ============================================
+        // ⏱ CONFIGURACIÓN Y VARIABLES
+        // ============================================
+        let tiempoTotal = 10 * 60; // 10 minutos por defecto (en segundos)
+        let tiempoRestante = tiempoTotal;
+        let intervalo = null;
+        let enEjecucion = false;
+        
+        // Alertas activadas
+        let alerta5minActivada = false;
+        let alerta3minActivada = false;
+        let alerta1minActivada = false;
+        
+        // Sistema de audio
+        let audioContext = null;
+        let sonidosHabilitados = false;
+
+        // ============================================
+        // 🎮 ELEMENTOS DE LA INTERFAZ
+        // ============================================
+        const timerDisplay = document.getElementById('timer');
+        const phaseIndicator = document.getElementById('phaseIndicator');
+        const progressBar = document.getElementById('progressBar');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const horasInput = document.getElementById('horasInput');
+        const minutosInput = document.getElementById('minutosInput');
+        const segundosInput = document.getElementById('segundosInput');
+        const tiempoTotalTexto = document.getElementById('tiempoTotalTexto');
+
+        // ============================================
+        // 🎵 SISTEMA DE AUDIO
+        // ============================================
+        function inicializarAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                sonidosHabilitados = true;
+            } catch (e) {
+                sonidosHabilitados = false;
+            }
+        }
+
+        function reproducirAlarmaLarga() {
+            if (!sonidosHabilitados) return;
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 500;
+                oscillator.type = 'sawtooth';
+                const ahora = audioContext.currentTime;
+                gainNode.gain.setValueAtTime(0, ahora);
+                gainNode.gain.linearRampToValueAtTime(1.0, ahora + 0.05);
+                gainNode.gain.setValueAtTime(1.0, ahora + 1.8);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 2.0);
+                oscillator.start(ahora);
+                oscillator.stop(ahora + 2.0);
+            } catch (e) {}
+        }
+
+        function reproducirAlertaCorta() {
+            if (!sonidosHabilitados) return;
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 1000;
+                oscillator.type = 'square';
+                const ahora = audioContext.currentTime;
+                gainNode.gain.setValueAtTime(0, ahora);
+                gainNode.gain.linearRampToValueAtTime(0.8, ahora + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 0.15);
+                oscillator.start(ahora);
+                oscillator.stop(ahora + 0.15);
+            } catch (e) {}
+        }
+
+        // ============================================
+        // ⚙️ CONFIGURACIÓN DE TIEMPO (HORAS, MINUTOS, SEGUNDOS)
+        // ============================================
+        function calcularTiempoTotal() {
+            const horas = parseInt(horasInput.value) || 0;
+            const minutos = parseInt(minutosInput.value) || 10;
+            const segundos = parseInt(segundosInput.value) || 0;
+            
+            // Validar valores
+            const horasValidas = Math.min(Math.max(horas, 0), 24);
+            const minutosValidos = Math.min(Math.max(minutos, 0), 59);
+            const segundosValidos = Math.min(Math.max(segundos, 0), 59);
+            
+            // Actualizar inputs con valores validados
+            horasInput.value = horasValidas;
+            minutosInput.value = minutosValidos;
+            segundosInput.value = segundosValidos;
+            
+            // Calcular tiempo total en segundos
+            return (horasValidas * 3600) + (minutosValidos * 60) + segundosValidos;
+        }
+
+        function actualizarTextoTotal() {
+            const tiempoSegundos = calcularTiempoTotal();
+            
+            if (tiempoSegundos === 0) {
+                tiempoTotalTexto.textContent = "0 segundos";
+                return;
+            }
+            
+            const horas = Math.floor(tiempoSegundos / 3600);
+            const minutos = Math.floor((tiempoSegundos % 3600) / 60);
+            const segundos = tiempoSegundos % 60;
+            
+            let texto = "";
+            if (horas > 0) texto += `${horas} ${horas === 1 ? 'hora' : 'horas'}`;
+            if (minutos > 0) {
+                if (texto !== "") texto += ", ";
+                texto += `${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`;
+            }
+            if (segundos > 0) {
+                if (texto !== "") texto += ", ";
+                texto += `${segundos} ${segundos === 1 ? 'segundo' : 'segundos'}`;
+            }
+            
+            tiempoTotalTexto.textContent = texto;
+        }
+
+        function configurarTiempo() {
+            tiempoTotal = calcularTiempoTotal();
+            
+            if (!enEjecucion) {
+                tiempoRestante = tiempoTotal;
+                actualizarDisplay();
+                reiniciarAlertas();
+            }
+            
+            // Actualizar Firebase si estamos en ejecución
+            if (enEjecucion) {
+                db.ref("cronometro").update({
+                    tiempoTotal: tiempoTotal,
+                    tiempoRestante: tiempoRestante
+                });
+            }
+            
+            actualizarTextoTotal();
+        }
+
+        function reiniciarAlertas() {
+            alerta5minActivada = false;
+            alerta3minActivada = false;
+            alerta1minActivada = false;
+        }
+
+        // ============================================
+        // 📡 SINCRONIZACIÓN CON FIREBASE
+        // ============================================
+        db.ref("cronometro").on("value", snapshot => {
+            const data = snapshot.val();
+            if (!data) {
+                // Estado inicial
+                tiempoTotal = 10 * 60;
+                tiempoRestante = tiempoTotal;
+                enEjecucion = false;
+                actualizarDisplay();
+                habilitarControles(true, false, true);
+                clearInterval(intervalo);
+                return;
+            }
+
+            // Sincronizar tiempo
+            tiempoTotal = data.tiempoTotal || tiempoTotal;
+            tiempoRestante = data.tiempoRestante || tiempoRestante;
+            enEjecucion = data.enEjecucion || false;
+
+            // Sincronizar alertas
+            alerta5minActivada = data.alerta5min || false;
+            alerta3minActivada = data.alerta3min || false;
+            alerta1minActivada = data.alerta1min || false;
+
+            // Actualizar inputs
+            const horas = Math.floor(tiempoTotal / 3600);
+            const minutos = Math.floor((tiempoTotal % 3600) / 60);
+            const segundos = tiempoTotal % 60;
+            
+            horasInput.value = horas;
+            minutosInput.value = minutos;
+            segundosInput.value = segundos;
+            actualizarTextoTotal();
+
+            // Actualizar interfaz
+            actualizarDisplay();
+            
+            if (enEjecucion) {
+                phaseIndicator.innerHTML = `<i class="fas fa-hourglass-half"></i> EN EJECUCIÓN`;
+                phaseIndicator.className = "phase-indicator en-ejecucion";
+                habilitarControles(false, true, false);
+                deshabilitarInputs(true);
+                
+                // Iniciar intervalo local
+                clearInterval(intervalo);
+                intervalo = setInterval(() => {
+                    tiempoRestante = Math.max(tiempoRestante - 1, 0);
+                    actualizarDisplay();
+                    manejarAlertasLocales();
+                    
+                    // Actualizar Firebase
+                    db.ref("cronometro").update({
+                        tiempoRestante: tiempoRestante
+                    });
+                    
+                    if (tiempoRestante === 0) {
+                        clearInterval(intervalo);
+                        db.ref("cronometro").update({
+                            enEjecucion: false
+                        });
+                    }
+                }, 1000);
+            } else {
+                phaseIndicator.innerHTML = `<i class="fas fa-pause-circle"></i> DETENIDO`;
+                phaseIndicator.className = "phase-indicator detenido";
+                habilitarControles(true, false, true);
+                deshabilitarInputs(false);
+                clearInterval(intervalo);
+            }
+        });
+
+        // ============================================
+        // 🖥 FUNCIONES DE INTERFAZ
+        // ============================================
+        function actualizarDisplay() {
+            const horas = Math.floor(tiempoRestante / 3600);
+            const minutos = Math.floor((tiempoRestante % 3600) / 60);
+            const segundos = tiempoRestante % 60;
+            
+            if (horas > 0) {
+                // Mostrar formato HH:MM:SS
+                timerDisplay.textContent = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+            } else {
+                // Mostrar formato MM:SS
+                timerDisplay.textContent = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+            }
+            
+            const progreso = ((tiempoTotal - tiempoRestante) / tiempoTotal) * 100;
+            progressBar.style.width = `${progreso}%`;
+            
+            if (tiempoRestante <= 5) {
+                timerDisplay.classList.remove('tiempo-alerta');
+                timerDisplay.classList.add('tiempo-critico');
+                progressBar.style.background = 'linear-gradient(90deg, var(--accent-red), #e91e63)';
+            } else if (tiempoRestante <= 60) {
+                timerDisplay.classList.add('tiempo-alerta');
+                timerDisplay.classList.remove('tiempo-critico');
+                progressBar.style.background = 'linear-gradient(90deg, var(--accent-orange), var(--accent-red))';
+            } else {
+                timerDisplay.classList.remove('tiempo-critico', 'tiempo-alerta');
+                progressBar.style.background = 'linear-gradient(90deg, var(--accent-green), var(--accent-blue))';
+            }
+        }
+
+        function manejarAlertasLocales() {
+            const minutosRestantes = Math.floor(tiempoRestante / 60);
+            const horasRestantes = Math.floor(tiempoRestante / 3600);
+            
+            // Convertir alertas a segundos para tiempos largos
+            const alerta5minEnSegundos = 5 * 60;
+            const alerta3minEnSegundos = 3 * 60;
+            const alerta1minEnSegundos = 1 * 60;
+            
+            // Alertas en tiempo específico
+            if (tiempoRestante === alerta5minEnSegundos && !alerta5minActivada) {
+                phaseIndicator.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ¡5 MINUTOS RESTANTES!`;
+                reproducirAlarmaLarga();
+                alerta5minActivada = true;
+                db.ref("cronometro").update({ alerta5min: true });
+            }
+            
+            if (tiempoRestante === alerta3minEnSegundos && !alerta3minActivada) {
+                phaseIndicator.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ¡3 MINUTOS RESTANTES!`;
+                reproducirAlarmaLarga();
+                alerta3minActivada = true;
+                db.ref("cronometro").update({ alerta3min: true });
+            }
+            
+            if (tiempoRestante === alerta1minEnSegundos && !alerta1minActivada) {
+                phaseIndicator.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ¡1 MINUTO RESTANTE!`;
+                reproducirAlarmaLarga();
+                alerta1minActivada = true;
+                db.ref("cronometro").update({ alerta1min: true });
+            }
+            
+            // Últimos 5 segundos
+            if (tiempoRestante <= 5 && tiempoRestante > 0) {
+                phaseIndicator.innerHTML = `<i class="fas fa-hourglass-end"></i> ¡ÚLTIMOS ${tiempoRestante} SEGUNDOS!`;
+                reproducirAlertaCorta();
+            }
+            
+            // Tiempo terminado
+            if (tiempoRestante === 0) {
+                phaseIndicator.innerHTML = `<i class="fas fa-flag-checkered"></i> ¡TIEMPO FINALIZADO!`;
+                setTimeout(() => reproducirAlarmaLarga(), 200);
+            }
+        }
+
+        // ============================================
+        // 🎮 FUNCIONES DE CONTROL
+        // ============================================
+        function iniciar() {
+            db.ref("cronometro").set({
+                enEjecucion: true,
+                tiempoTotal: tiempoTotal,
+                tiempoRestante: tiempoRestante,
+                alerta5min: false,
+                alerta3min: false,
+                alerta1min: false,
+                inicio: Date.now()
+            });
+        }
+
+        function detener() {
+            db.ref("cronometro").update({
+                enEjecucion: false
+            });
+        }
+
+        function reiniciar() {
+            tiempoRestante = tiempoTotal;
+            reiniciarAlertas();
+            db.ref("cronometro").set({
+                enEjecucion: false,
+                tiempoTotal: tiempoTotal,
+                tiempoRestante: tiempoRestante,
+                alerta5min: false,
+                alerta3min: false,
+                alerta1min: false
+            });
+        }
+
+        function habilitarControles(iniciar, detener, reiniciar) {
+            startBtn.disabled = !iniciar;
+            stopBtn.disabled = !detener;
+            resetBtn.disabled = !reiniciar;
+        }
+
+        function deshabilitarInputs(deshabilitar) {
+            horasInput.disabled = deshabilitar;
+            minutosInput.disabled = deshabilitar;
+            segundosInput.disabled = deshabilitar;
+        }
+
+        // ============================================
+        // 🔗 EVENT LISTENERS
+        // ============================================
+        startBtn.addEventListener('click', iniciar);
+        stopBtn.addEventListener('click', detener);
+        resetBtn.addEventListener('click', reiniciar);
+        
+        horasInput.addEventListener('change', configurarTiempo);
+        minutosInput.addEventListener('change', configurarTiempo);
+        segundosInput.addEventListener('change', configurarTiempo);
+
+        // Activar audio al primer clic
+        document.addEventListener('click', function() {
+            if (!sonidosHabilitados) inicializarAudio();
+        }, { once: true });
+
+        // ============================================
+        // 🚀 INICIALIZACIÓN
+        // ============================================
+        function inicializar() {
+            configurarTiempo();
+            actualizarDisplay();
+            habilitarControles(true, false, true);
+        }
+
+        window.addEventListener('load', inicializar);
+    </script>
+</body>
+</html>
