@@ -674,99 +674,21 @@
         // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBYXblIyc9N5NqBCzL4R5d3AOwrwpy6NlA",
-            authDomain: "crono-clasificatoria.firebaseapp.com",
-            databaseURL: "https://crono-clasificatoria-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "crono-clasificatoria",
-            storageBucket: "crono-clasificatoria.firebasestorage.app",
-            messagingSenderId: "913248573377",
-            appId: "1:913248573377:web:36b4d2ba5dccce08e08140"
+    authDomain: "crono-clasificatoria.firebaseapp.com",
+    databaseURL: "https://crono-clasificatoria-default-rtdb.europe-west1.firebasedatabase.app", // ¡Verifica esta línea!
+    projectId: "crono-clasificatoria",
+    storageBucket: "crono-clasificatoria.firebasestorage.app",
+    messagingSenderId: "913248573377",
+    appId: "1:913248573377:web:36b4d2ba5dccce08e08140"
         };
 
         // ============================================
         // 🌐 INICIALIZACIÓN FIREBASE CON RECONEXIÓN AUTOMÁTICA
         // ============================================
-        let firebaseApp;
-        let db;
-        let firebaseDisponible = true;
-        let connectionStatus = document.getElementById('connectionStatus');
-        let reconexionIntentos = 0;
-        const MAX_RECONEXIONES = 10;
+      // Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-        // Función para inicializar Firebase
-        function inicializarFirebase() {
-            try {
-                if (firebase.apps.length === 0) {
-                    firebaseApp = firebase.initializeApp(firebaseConfig);
-                } else {
-                    firebaseApp = firebase.app();
-                }
-                
-                db = firebase.database();
-                firebaseDisponible = true;
-                
-                // Configurar listeners de conexión
-                configurarMonitoreoConexion();
-                
-                console.log("✅ Firebase inicializado correctamente");
-                actualizarEstadoConexion(true, "CONECTADO");
-                
-                // Iniciar sincronización
-                configurarFirebaseListener();
-                
-            } catch (error) {
-                console.error("❌ Error al inicializar Firebase:", error);
-                firebaseDisponible = false;
-                actualizarEstadoConexion(false, "ERROR FIREBASE");
-                
-                // Intentar reconexión después de 5 segundos
-                setTimeout(() => {
-                    if (reconexionIntentos < MAX_RECONEXIONES) {
-                        reconexionIntentos++;
-                        console.log(`🔄 Intento de reconexión ${reconexionIntentos}/${MAX_RECONEXIONES}`);
-                        inicializarFirebase();
-                    }
-                }, 5000);
-            }
-        }
-
-        // ============================================
-        // 📡 SISTEMA DE RECONEXIÓN AUTOMÁTICA
-        // ============================================
-        function configurarMonitoreoConexion() {
-            // Monitor de conexión de Firebase
-            db.ref(".info/connected").on("value", function(snap) {
-                if (snap.val() === true) {
-                    firebaseDisponible = true;
-                    reconexionIntentos = 0; // Resetear contador de reconexiones
-                    actualizarEstadoConexion(true, "CONECTADO");
-                    console.log("📡 Conexión Firebase establecida");
-                } else {
-                    firebaseDisponible = false;
-                    actualizarEstadoConexion(false, "RECONECTANDO...");
-                    console.log("⚠️ Conexión Firebase perdida, reconectando...");
-                }
-            });
-
-            // Detectar errores de conexión
-            db.ref(".info/connected").on("value", null, function(error) {
-                console.error("❌ Error de conexión Firebase:", error);
-                firebaseDisponible = false;
-                actualizarEstadoConexion(false, "ERROR CONEXIÓN");
-                
-                // Intentar reconexión
-                setTimeout(inicializarFirebase, 3000);
-            });
-        }
-
-        function actualizarEstadoConexion(conectado, mensaje) {
-            if (conectado) {
-                connectionStatus.className = "connection-status connection-online";
-                connectionStatus.innerHTML = `<i class="fas fa-wifi"></i> ${mensaje}`;
-            } else {
-                connectionStatus.className = "connection-status connection-offline";
-                connectionStatus.innerHTML = `<i class="fas fa-wifi-slash"></i> ${mensaje}`;
-            }
-        }
 
         // ============================================
         // ⏱ VARIABLES DEL CRONÓMETRO
@@ -1326,3 +1248,4 @@
     </script>
 </body>
 </html>
+
