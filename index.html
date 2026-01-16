@@ -25,6 +25,10 @@
             --danger-bg: rgba(244, 67, 54, 0.2);
             --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.5);
             --shadow-medium: 0 10px 20px rgba(0, 0, 0, 0.3);
+            --timer-xl: 15rem; /* NUEVO: Tamaño máximo del cronómetro */
+            --timer-lg: 10rem; /* NUEVO: Tamaño grande para tablets */
+            --timer-md: 7rem;  /* NUEVO: Tamaño medio para móviles */
+            --timer-sm: 5rem;  /* NUEVO: Tamaño pequeño para móviles pequeños */
         }
 
         * {
@@ -56,10 +60,10 @@
             background: var(--bg-overlay);
             backdrop-filter: blur(12px);
             border-radius: 24px;
-            padding: 2.5rem;
+            padding: 1.5rem; /* Reducido para dar más espacio al cronómetro */
             box-shadow: var(--shadow-heavy);
             border: 1px solid var(--border-light);
-            max-width: 900px;
+            max-width: 1000px; /* Aumentado */
             width: 95%;
             position: relative;
             margin: auto;
@@ -77,10 +81,10 @@
         }
 
         h1 {
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             color: var(--accent-yellow);
             text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem; /* Reducido */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -90,50 +94,49 @@
         .config-panel {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+            padding: 1rem; /* Reducido */
+            margin-bottom: 1rem; /* Reducido */
             border: 1px solid var(--border-light);
         }
 
         .config-title {
             color: var(--accent-yellow);
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: 1.2rem; /* Reducido */
+            margin-bottom: 0.8rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .time-inputs-horizontal {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 30px;
+            gap: 8px; /* Reducido */
             flex-wrap: nowrap;
-            margin-bottom: 1rem;
         }
 
         .time-group-horizontal {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 5px;
             flex: 1;
-            max-width: 120px;
+            max-width: 70px; /* Reducido */
         }
 
         .time-group-horizontal label {
-            font-size: 1.1rem;
+            font-size: 0.85rem; /* Reducido */
             font-weight: 600;
             color: var(--accent-yellow);
             white-space: nowrap;
         }
 
         .time-group-horizontal input {
-            padding: 0.8rem 1rem;
-            font-size: 1.8rem;
-            border-radius: 12px;
+            padding: 0.5rem;
+            font-size: 1.3rem; /* Reducido */
+            border-radius: 8px;
             border: 2px solid var(--border-light);
             background: rgba(255, 255, 255, 0.1);
             color: white;
@@ -154,40 +157,31 @@
         }
 
         .time-separator {
-            font-size: 2rem;
+            font-size: 1.5rem; /* Reducido */
             font-weight: bold;
             color: var(--accent-yellow);
-            margin: 0 5px;
+            margin: 0 2px;
             align-self: center;
             line-height: 1;
         }
 
-        .total-time {
-            margin-top: 1rem;
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
         .status-container {
-            margin: 1.5rem 0;
+            margin: 0.5rem 0; /* Reducido */
         }
 
         .phase-indicator {
-            font-size: 1.8rem;
+            font-size: 1.5rem; /* Reducido */
             font-weight: 700;
-            padding: 1rem;
+            padding: 0.7rem; /* Reducido */
             border-radius: 16px;
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid transparent;
-            min-height: 80px;
+            min-height: 60px; /* Reducido */
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem; /* Reducido */
         }
 
         .en-ejecucion {
@@ -201,44 +195,102 @@
             border-color: var(--border-light);
         }
 
+        /* ============================================
+           🆕 DISEÑO MEJORADO DEL CRONÓMETRO
+           ============================================ */
+        .timer-container {
+            position: relative;
+            margin: 0.5rem 0; /* Reducido */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         .timer-display {
-            font-size: 7rem;
+            font-family: 'Courier New', 'Roboto Mono', 'Consolas', monospace; /* Mejor tipografía para números */
+            font-size: var(--timer-xl); /* Tamaño XL por defecto */
             font-weight: 900;
-            margin: 1rem 0;
-            text-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+            text-shadow: 
+                0 0 30px rgba(255, 255, 255, 0.3),
+                0 0 60px rgba(255, 255, 255, 0.2),
+                0 0 100px rgba(255, 255, 255, 0.1); /* Efecto de neón mejorado */
             font-variant-numeric: tabular-nums;
-            letter-spacing: 6px;
+            letter-spacing: 5px; /* Reducido para mejor legibilidad */
             line-height: 1;
             transition: all 0.3s;
-            min-height: 140px;
+            min-height: 200px; /* Aumentado */
             display: flex;
             align-items: center;
             justify-content: center;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05); /* Fondo sutil para contraste */
+            box-shadow: 
+                inset 0 0 20px rgba(0, 0, 0, 0.3),
+                0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Efecto de brillo adicional */
+        .timer-display::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 22px;
+            background: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 50%,
+                rgba(255, 255, 255, 0.1) 100%
+            );
+            z-index: -1;
+            filter: blur(5px);
         }
 
         .tiempo-critico {
-            color: var(--accent-red) !important;
-            animation: pulse 1s infinite alternate;
-            text-shadow: 0 0 50px rgba(244, 67, 54, 0.8) !important;
+            color: #ff4444 !important;
+            animation: pulse 0.8s infinite alternate;
+            text-shadow: 
+                0 0 40px rgba(255, 68, 68, 0.8),
+                0 0 80px rgba(255, 68, 68, 0.6),
+                0 0 120px rgba(255, 68, 68, 0.4) !important;
         }
 
         .tiempo-alerta {
-            color: var(--accent-orange) !important;
-            text-shadow: 0 0 40px rgba(255, 152, 0, 0.8) !important;
+            color: #ff9800 !important;
+            text-shadow: 
+                0 0 30px rgba(255, 152, 0, 0.7),
+                0 0 60px rgba(255, 152, 0, 0.5),
+                0 0 90px rgba(255, 152, 0, 0.3) !important;
         }
 
+        /* Efecto de parpadeo más rápido para tiempo crítico */
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.03); opacity: 0.9; }
+            0% { 
+                transform: scale(1); 
+                opacity: 1; 
+                filter: brightness(1.2);
+            }
+            100% { 
+                transform: scale(1.02); 
+                opacity: 0.9; 
+                filter: brightness(1.5);
+            }
         }
 
         .progress-container {
             width: 100%;
-            height: 10px;
+            height: 10px; /* Aumentado */
             background: rgba(255, 255, 255, 0.1);
             border-radius: 5px;
             overflow: hidden;
-            margin: 1.5rem 0;
+            margin: 1rem 0; /* Reducido */
         }
 
         .progress-bar {
@@ -251,27 +303,27 @@
 
         .controls {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
-            margin: 2.5rem 0;
+            margin: 1.5rem 0; /* Reducido */
             flex-wrap: wrap;
         }
 
         .btn {
-            padding: 1.3rem 2.6rem;
-            font-size: 1.3rem;
+            padding: 1.1rem 1.8rem; /* Reducido */
+            font-size: 1.1rem; /* Reducido */
             font-weight: 700;
             border: none;
-            border-radius: 16px;
+            border-radius: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 180px;
+            min-width: 150px; /* Reducido */
             text-transform: uppercase;
             letter-spacing: 1px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .btn-start {
@@ -281,7 +333,7 @@
         }
 
         .btn-start:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px); /* Reducido */
             box-shadow: 0 15px 30px rgba(0, 200, 83, 0.3);
         }
 
@@ -292,7 +344,7 @@
         }
 
         .btn-stop:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px); /* Reducido */
             box-shadow: 0 15px 30px rgba(244, 67, 54, 0.3);
         }
 
@@ -303,7 +355,7 @@
         }
 
         .btn-reset:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px); /* Reducido */
             box-shadow: 0 15px 30px rgba(33, 150, 243, 0.3);
         }
 
@@ -314,80 +366,251 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
         }
 
-        .audio-warning {
-            background: var(--danger-bg);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-top: 1.5rem;
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1000;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
-            font-size: 1.1rem;
+            gap: 8px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container { padding: 2rem; }
-            h1 { font-size: 2.2rem; }
-            .timer-display { font-size: 5rem; letter-spacing: 4px; }
-            .phase-indicator { font-size: 1.6rem; }
-            .btn { min-width: 160px; padding: 1.2rem 2.2rem; }
-            .time-inputs-horizontal { 
-                gap: 15px; 
+        .connection-online {
+            background: rgba(0, 200, 83, 0.9);
+            color: white;
+            border-color: rgba(0, 200, 83, 0.5);
+        }
+
+        .connection-offline {
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+            border-color: rgba(244, 67, 54, 0.5);
+        }
+
+        /* ============================================
+           📱 RESPONSIVE CON TAMAÑOS MÁS GRANDES
+           ============================================ */
+        
+        /* Pantallas grandes (más de 1200px) */
+        @media (min-width: 1200px) {
+            .timer-display {
+                font-size: 16rem; /* ¡ENORME para pantallas grandes! */
+                letter-spacing: 8px;
+                min-height: 250px;
+            }
+        }
+        
+        /* Tablets (768px - 1199px) */
+        @media (max-width: 1199px) and (min-width: 768px) {
+            .timer-display { 
+                font-size: var(--timer-lg); /* 10rem */
+                letter-spacing: 6px; 
+                min-height: 180px;
+                max-width: 700px;
+            }
+            
+            .container {
+                padding: 1.2rem;
+            }
+            
+            h1 { 
+                font-size: 2.2rem; 
+                margin-bottom: 0.8rem;
+            }
+        }
+
+        /* Tablets pequeñas (600px - 767px) */
+        @media (max-width: 767px) and (min-width: 600px) {
+            .timer-display { 
+                font-size: var(--timer-md); /* 7rem */
+                letter-spacing: 5px; 
+                min-height: 150px;
+                max-width: 550px;
+                padding: 0.4rem;
+            }
+            
+            .container { 
+                padding: 1rem; 
+                width: 98%;
+            }
+            
+            h1 { 
+                font-size: 1.8rem; 
+            }
+            
+            .phase-indicator { 
+                font-size: 1.3rem; 
+                min-height: 50px;
+                padding: 0.5rem;
+            }
+            
+            .btn { 
+                min-width: 130px; 
+                padding: 1rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+
+        /* Móviles (480px - 599px) */
+        @media (max-width: 599px) and (min-width: 480px) {
+            .timer-display { 
+                font-size: 6rem; /* Intermedio entre md y sm */
+                letter-spacing: 4px; 
+                min-height: 120px;
+                max-width: 450px;
+                padding: 0.3rem;
+            }
+            
+            h1 { 
+                font-size: 1.6rem; 
                 flex-wrap: wrap;
+                gap: 10px;
             }
+            
+            .btn { 
+                min-width: 120px; 
+                padding: 0.9rem 1.2rem;
+                font-size: 0.95rem;
+            }
+            
+            .controls { 
+                gap: 10px;
+            }
+            
+            .time-inputs-horizontal { 
+                gap: 6px; 
+            }
+            
             .time-group-horizontal { 
-                max-width: 100px;
-                flex: 0 0 auto;
+                max-width: 60px;
             }
+            
             .time-group-horizontal input { 
-                font-size: 1.5rem;
-                padding: 0.6rem 0.8rem;
+                font-size: 1.2rem;
+                padding: 0.4rem;
             }
+            
             .time-separator { 
-                font-size: 1.5rem;
-                margin: 0 3px;
+                font-size: 1.3rem;
             }
         }
 
-        @media (max-width: 480px) {
-            h1 { font-size: 1.8rem; }
-            .timer-display { font-size: 3.5rem; letter-spacing: 3px; min-height: 100px; }
-            .btn { min-width: 100%; }
-            .controls { flex-direction: column; }
+        /* Móviles pequeños (hasta 479px) */
+        @media (max-width: 479px) {
+            .timer-display { 
+                font-size: var(--timer-sm); /* 5rem */
+                letter-spacing: 3px; 
+                min-height: 100px;
+                max-width: 350px;
+                padding: 0.2rem;
+            }
+            
+            h1 { 
+                font-size: 1.4rem; 
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .btn { 
+                min-width: 100%; 
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .controls { 
+                flex-direction: column; 
+                gap: 8px;
+            }
+            
             .time-inputs-horizontal { 
-                gap: 10px; 
-                flex-direction: row;
-                justify-content: space-between;
+                gap: 4px; 
             }
+            
             .time-group-horizontal { 
-                max-width: 80px;
+                max-width: 55px;
             }
+            
             .time-group-horizontal input { 
-                font-size: 1.3rem;
-                padding: 0.5rem 0.6rem;
+                font-size: 1.1rem;
+                padding: 0.3rem;
             }
+            
             .time-separator { 
                 font-size: 1.2rem;
             }
+            
+            .config-panel {
+                padding: 0.8rem;
+            }
+            
+            .phase-indicator {
+                font-size: 1.1rem;
+                min-height: 45px;
+                padding: 0.4rem;
+            }
         }
 
-        @media (max-height: 800px) {
+        /* Pantallas con poca altura (ej: móviles en horizontal) */
+        @media (max-height: 700px) {
             .container { 
-                padding: 1.5rem;
-                margin: 10px auto;
+                padding: 1rem;
+                margin: 5px auto;
             }
-            h1 { font-size: 2.2rem; margin-bottom: 1rem; }
-            .timer-display { font-size: 5rem; min-height: 100px; }
-            .phase-indicator { font-size: 1.5rem; min-height: 60px; }
-            .controls { margin: 1.5rem 0; }
+            
+            h1 { 
+                font-size: 1.8rem; 
+                margin-bottom: 0.5rem; 
+            }
+            
+            .timer-display { 
+                font-size: 8rem; 
+                min-height: 130px; 
+                margin: 0.3rem 0;
+            }
+            
+            .phase-indicator { 
+                font-size: 1.2rem; 
+                min-height: 45px; 
+                margin-bottom: 0.3rem;
+            }
+            
+            .controls { 
+                margin: 1rem 0; 
+            }
+            
+            .config-panel {
+                margin-bottom: 0.8rem;
+            }
+        }
+
+        /* Pantallas muy altas (más de 1000px de altura) */
+        @media (min-height: 1000px) {
+            .timer-display {
+                font-size: 14rem;
+                min-height: 220px;
+            }
+            
+            .container {
+                padding: 2rem;
+            }
         }
     </style>
 </head>
 <body>
+    <div id="connectionStatus" class="connection-status connection-online">
+        <i class="fas fa-wifi"></i> CONECTADO
+    </div>
+    
     <div class="container">
-        <h1><i class="fas fa-flag-checkered"></i> CRONÓMETRO DE CLASIFICACIONES</h1>
+        <h1><i class="fas fa-flag-checkered"></i> CRONÓMETRO SINCRONIZADO</h1>
         
         <div class="config-panel">
             <div class="config-title">
@@ -396,40 +619,39 @@
             
             <div class="time-inputs-horizontal">
                 <div class="time-group-horizontal">
-                    <label for="horasInput">Horas</label>
+                    <label for="horasInput">H</label>
                     <input type="number" id="horasInput" min="0" max="24" value="0" placeholder="0">
                 </div>
                 
                 <div class="time-separator">:</div>
                 
                 <div class="time-group-horizontal">
-                    <label for="minutosInput">Minutos</label>
+                    <label for="minutosInput">M</label>
                     <input type="number" id="minutosInput" min="0" max="59" value="0" placeholder="0">
                 </div>
                 
                 <div class="time-separator">:</div>
                 
                 <div class="time-group-horizontal">
-                    <label for="segundosInput">Segundos</label>
+                    <label for="segundosInput">S</label>
                     <input type="number" id="segundosInput" min="0" max="59" value="0" placeholder="0">
                 </div>
-            </div>
-            
-            <div class="total-time" id="totalTime">
-                Tiempo total: <span id="tiempoTotalTexto">0 segundos</span>
             </div>
         </div>
         
         <div class="status-container">
             <div id="phaseIndicator" class="phase-indicator detenido">
-                <i class="fas fa-pause-circle"></i> DETENIDO
+                <!-- Sin texto, solo indicador visual -->
             </div>
             
             <div class="progress-container">
                 <div id="progressBar" class="progress-bar"></div>
             </div>
             
-            <div id="timer" class="timer-display">00:00</div>
+            <!-- 🆕 CONTENEDOR MEJORADO PARA EL CRONÓMETRO -->
+            <div class="timer-container">
+                <div id="timer" class="timer-display">00:00</div>
+            </div>
         </div>
         
         <div class="controls">
@@ -444,17 +666,11 @@
             </button>
         </div>
         
-        <div class="audio-warning">
-            <i class="fas fa-volume-up"></i>
-            <div>
-                <strong>IMPORTANTE:</strong> Haz clic en la página antes de iniciar para activar el audio
-            </div>
-        </div>
     </div>
 
     <script>
         // ============================================
-        // 🔥 CONFIGURACIÓN FIREBASE
+        // 🔥 CONFIGURACIÓN FIREBASE (SIEMPRE ACTIVA)
         // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBYXblIyc9N5NqBCzL4R5d3AOwrwpy6NlA",
@@ -466,14 +682,96 @@
             appId: "1:913248573377:web:36b4d2ba5dccce08e08140"
         };
 
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        // ============================================
+        // 🌐 INICIALIZACIÓN FIREBASE CON RECONEXIÓN AUTOMÁTICA
+        // ============================================
+        let firebaseApp;
+        let db;
+        let firebaseDisponible = true;
+        let connectionStatus = document.getElementById('connectionStatus');
+        let reconexionIntentos = 0;
+        const MAX_RECONEXIONES = 10;
+
+        // Función para inicializar Firebase
+        function inicializarFirebase() {
+            try {
+                if (firebase.apps.length === 0) {
+                    firebaseApp = firebase.initializeApp(firebaseConfig);
+                } else {
+                    firebaseApp = firebase.app();
+                }
+                
+                db = firebase.database();
+                firebaseDisponible = true;
+                
+                // Configurar listeners de conexión
+                configurarMonitoreoConexion();
+                
+                console.log("✅ Firebase inicializado correctamente");
+                actualizarEstadoConexion(true, "CONECTADO");
+                
+                // Iniciar sincronización
+                configurarFirebaseListener();
+                
+            } catch (error) {
+                console.error("❌ Error al inicializar Firebase:", error);
+                firebaseDisponible = false;
+                actualizarEstadoConexion(false, "ERROR FIREBASE");
+                
+                // Intentar reconexión después de 5 segundos
+                setTimeout(() => {
+                    if (reconexionIntentos < MAX_RECONEXIONES) {
+                        reconexionIntentos++;
+                        console.log(`🔄 Intento de reconexión ${reconexionIntentos}/${MAX_RECONEXIONES}`);
+                        inicializarFirebase();
+                    }
+                }, 5000);
+            }
+        }
 
         // ============================================
-        // ⏱ CONFIGURACIÓN Y VARIABLES
+        // 📡 SISTEMA DE RECONEXIÓN AUTOMÁTICA
         // ============================================
-        let tiempoTotal = 0; // Comienza en 0 segundos
+        function configurarMonitoreoConexion() {
+            // Monitor de conexión de Firebase
+            db.ref(".info/connected").on("value", function(snap) {
+                if (snap.val() === true) {
+                    firebaseDisponible = true;
+                    reconexionIntentos = 0; // Resetear contador de reconexiones
+                    actualizarEstadoConexion(true, "CONECTADO");
+                    console.log("📡 Conexión Firebase establecida");
+                } else {
+                    firebaseDisponible = false;
+                    actualizarEstadoConexion(false, "RECONECTANDO...");
+                    console.log("⚠️ Conexión Firebase perdida, reconectando...");
+                }
+            });
+
+            // Detectar errores de conexión
+            db.ref(".info/connected").on("value", null, function(error) {
+                console.error("❌ Error de conexión Firebase:", error);
+                firebaseDisponible = false;
+                actualizarEstadoConexion(false, "ERROR CONEXIÓN");
+                
+                // Intentar reconexión
+                setTimeout(inicializarFirebase, 3000);
+            });
+        }
+
+        function actualizarEstadoConexion(conectado, mensaje) {
+            if (conectado) {
+                connectionStatus.className = "connection-status connection-online";
+                connectionStatus.innerHTML = `<i class="fas fa-wifi"></i> ${mensaje}`;
+            } else {
+                connectionStatus.className = "connection-status connection-offline";
+                connectionStatus.innerHTML = `<i class="fas fa-wifi-slash"></i> ${mensaje}`;
+            }
+        }
+
+        // ============================================
+        // ⏱ VARIABLES DEL CRONÓMETRO
+        // ============================================
+        let tiempoTotal = 0;
         let tiempoRestante = tiempoTotal;
         let intervalo = null;
         let enEjecucion = false;
@@ -499,7 +797,6 @@
         const horasInput = document.getElementById('horasInput');
         const minutosInput = document.getElementById('minutosInput');
         const segundosInput = document.getElementById('segundosInput');
-        const tiempoTotalTexto = document.getElementById('tiempoTotalTexto');
 
         // ============================================
         // 🎵 SISTEMA DE AUDIO
@@ -508,7 +805,9 @@
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 sonidosHabilitados = true;
+                console.log("🔊 Audio inicializado");
             } catch (e) {
+                console.warn("⚠️ Audio no disponible:", e);
                 sonidosHabilitados = false;
             }
         }
@@ -529,7 +828,9 @@
                 gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 2.0);
                 oscillator.start(ahora);
                 oscillator.stop(ahora + 2.0);
-            } catch (e) {}
+            } catch (e) {
+                console.warn("Error en alarma larga:", e);
+            }
         }
 
         function reproducirAlertaCorta() {
@@ -547,55 +848,28 @@
                 gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 0.15);
                 oscillator.start(ahora);
                 oscillator.stop(ahora + 0.15);
-            } catch (e) {}
+            } catch (e) {
+                console.warn("Error en alerta corta:", e);
+            }
         }
 
         // ============================================
-        // ⚙️ CONFIGURACIÓN DE TIEMPO (HORAS, MINUTOS, SEGUNDOS)
+        // ⚙️ CONFIGURACIÓN DE TIEMPO
         // ============================================
         function calcularTiempoTotal() {
             const horas = parseInt(horasInput.value) || 0;
             const minutos = parseInt(minutosInput.value) || 0;
             const segundos = parseInt(segundosInput.value) || 0;
             
-            // Validar valores
             const horasValidas = Math.min(Math.max(horas, 0), 24);
             const minutosValidos = Math.min(Math.max(minutos, 0), 59);
             const segundosValidos = Math.min(Math.max(segundos, 0), 59);
             
-            // Actualizar inputs con valores validados
             horasInput.value = horasValidas;
             minutosInput.value = minutosValidos;
             segundosInput.value = segundosValidos;
             
-            // Calcular tiempo total en segundos
             return (horasValidas * 3600) + (minutosValidos * 60) + segundosValidos;
-        }
-
-        function actualizarTextoTotal() {
-            const tiempoSegundos = calcularTiempoTotal();
-            
-            if (tiempoSegundos === 0) {
-                tiempoTotalTexto.textContent = "0 segundos";
-                return;
-            }
-            
-            const horas = Math.floor(tiempoSegundos / 3600);
-            const minutos = Math.floor((tiempoSegundos % 3600) / 60);
-            const segundos = tiempoSegundos % 60;
-            
-            let texto = "";
-            if (horas > 0) texto += `${horas} ${horas === 1 ? 'hora' : 'horas'}`;
-            if (minutos > 0) {
-                if (texto !== "") texto += ", ";
-                texto += `${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`;
-            }
-            if (segundos > 0) {
-                if (texto !== "") texto += ", ";
-                texto += `${segundos} ${segundos === 1 ? 'segundo' : 'segundos'}`;
-            }
-            
-            tiempoTotalTexto.textContent = texto;
         }
 
         function configurarTiempo() {
@@ -607,15 +881,19 @@
                 reiniciarAlertas();
             }
             
-            // Actualizar Firebase si estamos en ejecución
-            if (enEjecucion) {
-                db.ref("cronometro").update({
-                    tiempoTotal: tiempoTotal,
-                    tiempoRestante: tiempoRestante
-                });
+            // Sincronizar con Firebase si está disponible
+            if (firebaseDisponible && enEjecucion) {
+                try {
+                    db.ref("cronometro").update({
+                        tiempoTotal: tiempoTotal,
+                        tiempoRestante: tiempoRestante
+                    });
+                } catch (error) {
+                    console.log("⚠️ Error al sincronizar tiempo:", error);
+                }
             }
             
-            actualizarTextoTotal();
+            habilitarControles(!enEjecucion && tiempoTotal > 0, enEjecucion, true);
         }
 
         function reiniciarAlertas() {
@@ -625,77 +903,117 @@
         }
 
         // ============================================
-        // 📡 SINCRONIZACIÓN CON FIREBASE
+        // 📡 SINCRONIZACIÓN CON FIREBASE (SIEMPRE ACTIVA)
         // ============================================
-        db.ref("cronometro").on("value", snapshot => {
-            const data = snapshot.val();
-            if (!data) {
-                // Estado inicial - todos en 0
-                tiempoTotal = 0;
-                tiempoRestante = tiempoTotal;
-                enEjecucion = false;
-                actualizarDisplay();
-                habilitarControles(true, false, true);
-                clearInterval(intervalo);
-                return;
-            }
-
-            // Sincronizar tiempo
-            tiempoTotal = data.tiempoTotal || 0;
-            tiempoRestante = data.tiempoRestante || 0;
-            enEjecucion = data.enEjecucion || false;
-
-            // Sincronizar alertas
-            alerta5minActivada = data.alerta5min || false;
-            alerta3minActivada = data.alerta3min || false;
-            alerta1minActivada = data.alerta1min || false;
-
-            // Actualizar inputs
-            const horas = Math.floor(tiempoTotal / 3600);
-            const minutos = Math.floor((tiempoTotal % 3600) / 60);
-            const segundos = tiempoTotal % 60;
+        function configurarFirebaseListener() {
+            if (!db) return;
             
-            horasInput.value = horas;
-            minutosInput.value = minutos;
-            segundosInput.value = segundos;
-            actualizarTextoTotal();
-
-            // Actualizar interfaz
-            actualizarDisplay();
+            console.log("🔄 Configurando listener de Firebase...");
             
-            if (enEjecucion) {
-                phaseIndicator.innerHTML = `<i class="fas fa-hourglass-half"></i> EN EJECUCIÓN`;
-                phaseIndicator.className = "phase-indicator en-ejecucion";
-                habilitarControles(false, true, false);
-                deshabilitarInputs(true);
+            // Escuchar cambios en la base de datos
+            db.ref("cronometro").on("value", function(snapshot) {
+                const data = snapshot.val();
                 
-                // Iniciar intervalo local
-                clearInterval(intervalo);
-                intervalo = setInterval(() => {
-                    tiempoRestante = Math.max(tiempoRestante - 1, 0);
-                    actualizarDisplay();
-                    manejarAlertasLocales();
-                    
-                    // Actualizar Firebase
-                    db.ref("cronometro").update({
-                        tiempoRestante: tiempoRestante
+                if (!data) {
+                    // Si no hay datos, crear estructura inicial
+                    db.ref("cronometro").set({
+                        enEjecucion: false,
+                        tiempoTotal: 0,
+                        tiempoRestante: 0,
+                        alerta5min: false,
+                        alerta3min: false,
+                        alerta1min: false
                     });
+                    return;
+                }
+
+                // Sincronizar tiempo
+                tiempoTotal = data.tiempoTotal || 0;
+                tiempoRestante = data.tiempoRestante || 0;
+                enEjecucion = data.enEjecucion || false;
+
+                // Sincronizar alertas
+                alerta5minActivada = data.alerta5min || false;
+                alerta3minActivada = data.alerta3min || false;
+                alerta1minActivada = data.alerta1min || false;
+
+                // Actualizar inputs
+                const horas = Math.floor(tiempoTotal / 3600);
+                const minutos = Math.floor((tiempoTotal % 3600) / 60);
+                const segundos = tiempoTotal % 60;
+                
+                horasInput.value = horas;
+                minutosInput.value = minutos;
+                segundosInput.value = segundos;
+
+                // Actualizar interfaz
+                actualizarDisplay();
+                
+                if (enEjecucion) {
+                    phaseIndicator.className = "phase-indicator en-ejecucion";
+                    habilitarControles(false, true, false);
+                    deshabilitarInputs(true);
+                    
+                    // Iniciar intervalo local si no está corriendo
+                    if (!intervalo) {
+                        iniciarIntervaloTiempo();
+                    }
+                } else {
+                    phaseIndicator.className = "phase-indicator detenido";
+                    habilitarControles(true, false, true);
+                    deshabilitarInputs(false);
+                    
+                    // Detener intervalo local
+                    clearInterval(intervalo);
+                    intervalo = null;
+                }
+                
+                console.log("🔄 Datos sincronizados desde Firebase");
+                
+            }, function(error) {
+                console.error("❌ Error en listener Firebase:", error);
+                actualizarEstadoConexion(false, "ERROR SINCRONIZACIÓN");
+            });
+        }
+
+        function iniciarIntervaloTiempo() {
+            clearInterval(intervalo);
+            
+            intervalo = setInterval(function() {
+                if (tiempoRestante > 0) {
+                    tiempoRestante--;
+                    actualizarDisplay();
+                    manejarAlertas();
+                    
+                    // Sincronizar con Firebase
+                    if (firebaseDisponible) {
+                        try {
+                            db.ref("cronometro").update({
+                                tiempoRestante: tiempoRestante
+                            });
+                        } catch (error) {
+                            console.log("⚠️ Error al sincronizar tiempo restante:", error);
+                        }
+                    }
                     
                     if (tiempoRestante === 0) {
                         clearInterval(intervalo);
-                        db.ref("cronometro").update({
-                            enEjecucion: false
-                        });
+                        intervalo = null;
+                        
+                        // Actualizar estado en Firebase
+                        if (firebaseDisponible) {
+                            db.ref("cronometro").update({
+                                enEjecucion: false
+                            });
+                        } else {
+                            enEjecucion = false;
+                            habilitarControles(true, false, true);
+                            deshabilitarInputs(false);
+                        }
                     }
-                }, 1000);
-            } else {
-                phaseIndicator.innerHTML = `<i class="fas fa-pause-circle"></i> DETENIDO`;
-                phaseIndicator.className = "phase-indicator detenido";
-                habilitarControles(true, false, true);
-                deshabilitarInputs(false);
-                clearInterval(intervalo);
-            }
-        });
+                }
+            }, 1000);
+        }
 
         // ============================================
         // 🖥 FUNCIONES DE INTERFAZ
@@ -706,125 +1024,225 @@
             const segundos = tiempoRestante % 60;
             
             if (horas > 0) {
-                // Mostrar formato HH:MM:SS
                 timerDisplay.textContent = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
             } else if (minutos > 0) {
-                // Mostrar formato MM:SS
                 timerDisplay.textContent = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
             } else {
-                // Mostrar solo segundos
                 timerDisplay.textContent = `00:${String(segundos).padStart(2, '0')}`;
             }
             
-            // Manejar progreso cuando tiempoTotal es 0
+            // Barra de progreso
             let progreso = 0;
             if (tiempoTotal > 0) {
                 progreso = ((tiempoTotal - tiempoRestante) / tiempoTotal) * 100;
             }
             progressBar.style.width = `${progreso}%`;
             
+            // Colores según tiempo restante
             if (tiempoRestante <= 5 && tiempoRestante > 0) {
-                timerDisplay.classList.remove('tiempo-alerta');
                 timerDisplay.classList.add('tiempo-critico');
+                timerDisplay.classList.remove('tiempo-alerta');
                 progressBar.style.background = 'linear-gradient(90deg, var(--accent-red), #e91e63)';
+                phaseIndicator.className = "phase-indicator tiempo-critico";
             } else if (tiempoRestante <= 60 && tiempoRestante > 0) {
                 timerDisplay.classList.add('tiempo-alerta');
                 timerDisplay.classList.remove('tiempo-critico');
                 progressBar.style.background = 'linear-gradient(90deg, var(--accent-orange), var(--accent-red))';
+                phaseIndicator.className = "phase-indicator tiempo-alerta";
             } else {
                 timerDisplay.classList.remove('tiempo-critico', 'tiempo-alerta');
                 progressBar.style.background = 'linear-gradient(90deg, var(--accent-green), var(--accent-blue))';
-            }
-            
-            // Si el tiempo es 0, mostrar estilo especial
-            if (tiempoRestante === 0 && tiempoTotal === 0) {
-                timerDisplay.classList.remove('tiempo-critico', 'tiempo-alerta');
-                progressBar.style.background = 'linear-gradient(90deg, var(--accent-green), var(--accent-blue))';
+                phaseIndicator.className = enEjecucion ? "phase-indicator en-ejecucion" : "phase-indicator detenido";
             }
         }
 
-        function manejarAlertasLocales() {
-            // Convertir alertas a segundos
-            const alerta5minEnSegundos = 5 * 60;
-            const alerta3minEnSegundos = 3 * 60;
-            const alerta1minEnSegundos = 1 * 60;
+        function manejarAlertas() {
+            const alerta5min = 5 * 60;  // 5 minutos
+            const alerta3min = 3 * 60;  // 3 minutos
+            const alerta1min = 1 * 60;  // 1 minuto
             
-            // Solo mostrar alertas si hay tiempo suficiente
             if (tiempoTotal > 0) {
-                // Alertas en tiempo específico
-                if (tiempoRestante === alerta5minEnSegundos && !alerta5minActivada && tiempoTotal > alerta5minEnSegundos) {
-                    phaseIndicator.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ¡5 MINUTOS RESTANTES!`;
+                // Alarma a 5 minutos
+                if (tiempoRestante === alerta5min && !alerta5minActivada && tiempoTotal > alerta5min) {
                     reproducirAlarmaLarga();
                     alerta5minActivada = true;
-                    db.ref("cronometro").update({ alerta5min: true });
+                    if (firebaseDisponible) {
+                        db.ref("cronometro").update({ alerta5min: true });
+                    }
                 }
                 
-                if (tiempoRestante === alerta3minEnSegundos && !alerta3minActivada && tiempoTotal > alerta3minEnSegundos) {
-                    phaseIndicator.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ¡3 MINUTOS RESTANTES!`;
+                // Alarma a 3 minutos
+                if (tiempoRestante === alerta3min && !alerta3minActivada && tiempoTotal > alerta3min) {
                     reproducirAlarmaLarga();
                     alerta3minActivada = true;
-                    db.ref("cronometro").update({ alerta3min: true });
+                    if (firebaseDisponible) {
+                        db.ref("cronometro").update({ alerta3min: true });
+                    }
                 }
                 
-                if (tiempoRestante === alerta1minEnSegundos && !alerta1minActivada && tiempoTotal > alerta1minEnSegundos) {
-                    phaseIndicator.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ¡1 MINUTO RESTANTE!`;
+                // Alarma a 1 minuto
+                if (tiempoRestante === alerta1min && !alerta1minActivada && tiempoTotal > alerta1min) {
                     reproducirAlarmaLarga();
                     alerta1minActivada = true;
-                    db.ref("cronometro").update({ alerta1min: true });
+                    if (firebaseDisponible) {
+                        db.ref("cronometro").update({ alerta1min: true });
+                    }
                 }
                 
-                // Últimos 5 segundos (solo si el tiempo total es mayor a 5 segundos)
+                // Pitidos cada segundo en últimos 5 segundos
                 if (tiempoRestante <= 5 && tiempoRestante > 0 && tiempoTotal > 5) {
-                    phaseIndicator.innerHTML = `<i class="fas fa-hourglass-end"></i> ¡ÚLTIMOS ${tiempoRestante} SEGUNDOS!`;
                     reproducirAlertaCorta();
                 }
             }
             
-            // Tiempo terminado
+            // Alarma final cuando llega a 0
             if (tiempoRestante === 0 && tiempoTotal > 0) {
-                phaseIndicator.innerHTML = `<i class="fas fa-flag-checkered"></i> ¡TIEMPO FINALIZADO!`;
                 setTimeout(() => reproducirAlarmaLarga(), 200);
             }
         }
 
         // ============================================
-        // 🎮 FUNCIONES DE CONTROL
+        // 🎮 FUNCIONES DE CONTROL (SIEMPRE SINCRONIZADAS)
         // ============================================
         function iniciar() {
-            // Verificar que haya tiempo configurado
+            tiempoTotal = calcularTiempoTotal();
+            
             if (tiempoTotal === 0) {
-                alert("Por favor, configura un tiempo mayor a 0 antes de iniciar");
+                alert("⚠️ Configura un tiempo mayor a 0 antes de iniciar");
                 return;
             }
             
-            db.ref("cronometro").set({
-                enEjecucion: true,
-                tiempoTotal: tiempoTotal,
-                tiempoRestante: tiempoRestante,
-                alerta5min: false,
-                alerta3min: false,
-                alerta1min: false,
-                inicio: Date.now()
-            });
+            if (enEjecucion) return;
+            
+            console.log("▶️ INICIANDO cronómetro...");
+            
+            // Configurar tiempo restante
+            tiempoRestante = tiempoTotal;
+            
+            // Sincronizar con Firebase
+            if (firebaseDisponible) {
+                try {
+                    db.ref("cronometro").set({
+                        enEjecucion: true,
+                        tiempoTotal: tiempoTotal,
+                        tiempoRestante: tiempoRestante,
+                        alerta5min: false,
+                        alerta3min: false,
+                        alerta1min: false,
+                        ultimoCambio: Date.now(),
+                        dispositivo: navigator.userAgent.substring(0, 50)
+                    }).then(() => {
+                        console.log("✅ Cronómetro iniciado en Firebase");
+                        // El listener se encargará de actualizar la interfaz
+                    }).catch(error => {
+                        console.error("❌ Error al iniciar en Firebase:", error);
+                        iniciarLocal();
+                    });
+                } catch (error) {
+                    console.error("❌ Error con Firebase:", error);
+                    iniciarLocal();
+                }
+            } else {
+                // Modo local si Firebase no está disponible
+                iniciarLocal();
+            }
+        }
+        
+        function iniciarLocal() {
+            enEjecucion = true;
+            habilitarControles(false, true, false);
+            deshabilitarInputs(true);
+            phaseIndicator.className = "phase-indicator en-ejecucion";
+            iniciarIntervaloTiempo();
         }
 
         function detener() {
-            db.ref("cronometro").update({
-                enEjecucion: false
-            });
+            if (!enEjecucion) return;
+            
+            console.log("⏸️ DETENIENDO cronómetro...");
+            
+            // Sincronizar con Firebase
+            if (firebaseDisponible) {
+                try {
+                    db.ref("cronometro").update({
+                        enEjecucion: false
+                    }).then(() => {
+                        console.log("✅ Cronómetro detenido en Firebase");
+                        // El listener se encargará de actualizar la interfaz
+                    }).catch(error => {
+                        console.error("❌ Error al detener en Firebase:", error);
+                        detenerLocal();
+                    });
+                } catch (error) {
+                    console.error("❌ Error con Firebase:", error);
+                    detenerLocal();
+                }
+            } else {
+                // Modo local si Firebase no está disponible
+                detenerLocal();
+            }
+        }
+        
+        function detenerLocal() {
+            clearInterval(intervalo);
+            intervalo = null;
+            enEjecucion = false;
+            habilitarControles(true, false, true);
+            deshabilitarInputs(false);
+            phaseIndicator.className = "phase-indicator detenido";
         }
 
         function reiniciar() {
+            console.log("🔄 REINICIANDO cronómetro...");
+            
+            tiempoTotal = calcularTiempoTotal();
             tiempoRestante = tiempoTotal;
             reiniciarAlertas();
-            db.ref("cronometro").set({
-                enEjecucion: false,
-                tiempoTotal: tiempoTotal,
-                tiempoRestante: tiempoRestante,
-                alerta5min: false,
-                alerta3min: false,
-                alerta1min: false
-            });
+            
+            // Sincronizar con Firebase
+            if (firebaseDisponible) {
+                try {
+                    db.ref("cronometro").set({
+                        enEjecucion: false,
+                        tiempoTotal: tiempoTotal,
+                        tiempoRestante: tiempoRestante,
+                        alerta5min: false,
+                        alerta3min: false,
+                        alerta1min: false,
+                        ultimoCambio: Date.now()
+                    }).then(() => {
+                        console.log("✅ Cronómetro reiniciado en Firebase");
+                        actualizarDisplay();
+                    }).catch(error => {
+                        console.error("❌ Error al reiniciar en Firebase:", error);
+                        reiniciarLocal();
+                    });
+                } catch (error) {
+                    console.error("❌ Error con Firebase:", error);
+                    reiniciarLocal();
+                }
+            } else {
+                // Modo local si Firebase no está disponible
+                reiniciarLocal();
+            }
+        }
+        
+        function reiniciarLocal() {
+            // Detener si está en ejecución
+            clearInterval(intervalo);
+            intervalo = null;
+            enEjecucion = false;
+            
+            // Restablecer valores
+            tiempoTotal = calcularTiempoTotal();
+            tiempoRestante = tiempoTotal;
+            reiniciarAlertas();
+            
+            // Actualizar interfaz
+            habilitarControles(true, false, true);
+            deshabilitarInputs(false);
+            phaseIndicator.className = "phase-indicator detenido";
+            actualizarDisplay();
         }
 
         function habilitarControles(iniciar, detener, reiniciar) {
@@ -833,6 +1251,7 @@
             resetBtn.disabled = !reiniciar;
             
             // Deshabilitar botón de inicio si el tiempo es 0
+            tiempoTotal = calcularTiempoTotal();
             if (tiempoTotal === 0) {
                 startBtn.disabled = true;
                 startBtn.title = "Configura un tiempo mayor a 0 para iniciar";
@@ -848,26 +1267,26 @@
         }
 
         // ============================================
-        // 🔗 EVENT LISTENERS
+        // 📋 EVENT LISTENERS
         // ============================================
+        horasInput.addEventListener('input', configurarTiempo);
+        minutosInput.addEventListener('input', configurarTiempo);
+        segundosInput.addEventListener('input', configurarTiempo);
+
         startBtn.addEventListener('click', iniciar);
         stopBtn.addEventListener('click', detener);
         resetBtn.addEventListener('click', reiniciar);
-        
-        horasInput.addEventListener('change', configurarTiempo);
-        minutosInput.addEventListener('change', configurarTiempo);
-        segundosInput.addEventListener('change', configurarTiempo);
-
-        // Activar audio al primer clic
-        document.addEventListener('click', function() {
-            if (!sonidosHabilitados) inicializarAudio();
-        }, { once: true });
 
         // ============================================
         // 🚀 INICIALIZACIÓN
         // ============================================
         function inicializar() {
-            // Inicializar con todo en 0
+            console.log("🚀 Inicializando cronómetro MULTIDISPOSITIVO...");
+            
+            // Inicializar Firebase
+            inicializarFirebase();
+            
+            // Configurar tiempo inicial
             horasInput.value = 0;
             minutosInput.value = 0;
             segundosInput.value = 0;
@@ -875,9 +1294,35 @@
             configurarTiempo();
             actualizarDisplay();
             habilitarControles(true, false, true);
+            
+            // Inicializar audio
+            inicializarAudio();
+            
+            // Activar audio al primer clic
+            document.addEventListener('click', function() {
+                if (!sonidosHabilitados) {
+                    inicializarAudio();
+                }
+            }, { once: true });
+            
+            console.log("✅ Cronómetro listo para múltiples dispositivos");
         }
 
+        // Iniciar cuando la página cargue
         window.addEventListener('load', inicializar);
+        
+        // Reconexión automática si la página pierde y recupera conexión
+        window.addEventListener('online', function() {
+            console.log("🌐 Conexión a internet recuperada");
+            if (!firebaseDisponible) {
+                inicializarFirebase();
+            }
+        });
+        
+        window.addEventListener('offline', function() {
+            console.log("🌐 Conexión a internet perdida");
+            actualizarEstadoConexion(false, "SIN INTERNET");
+        });
     </script>
 </body>
 </html>
