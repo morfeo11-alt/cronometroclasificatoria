@@ -506,393 +506,588 @@
         
     </div>
 
-    <script>
-        // ============================================
-        // CONFIGURACIÓN FIREBASE
-        // ============================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyBYXblIyc9N5NqBCzL4R5d3AOwrwpy6NlA",
-            authDomain: "crono-clasificatoria.firebaseapp.com",
-            databaseURL: "https://crono-clasificatoria-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "crono-clasificatoria",
-            storageBucket: "crono-clasificatoria.firebasestorage.app",
-            messagingSenderId: "913248573377",
-            appId: "1:913248573377:web:36b4d2ba5dccce08e08140"
-        };
+   // Reemplaza TODO el código JavaScript desde la línea donde dice "// ============================================"
+// con este código corregido:
 
-        // ============================================
-        // INICIALIZACIÓN FIREBASE
-        // ============================================
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        
-        // Variables de estado
-        let firebaseDisponible = true;
-        let connectionStatus = document.getElementById('connectionStatus');
+<script>
+    // ============================================
+    // CONFIGURACIÓN FIREBASE
+    // ============================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyBYXblIyc9N5NqBCzL4R5d3AOwrwpy6NlA",
+        authDomain: "crono-clasificatoria.firebaseapp.com",
+        databaseURL: "https://crono-clasificatoria-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "crono-clasificatoria",
+        storageBucket: "crono-clasificatoria.firebasestorage.app",
+        messagingSenderId: "913248573377",
+        appId: "1:913248573377:web:36b4d2ba5dccce08e08140"
+    };
 
-        // ============================================
-        // VARIABLES DEL CRONÓMETRO
-        // ============================================
-        let tiempoTotal = 0;
-        let tiempoRestante = 0;
-        let intervalo = null;
-        let enEjecucion = false;
-        
-        // Alertas
-        let alerta5minActivada = false;
-        let alerta3minActivada = false;
-        let alerta1minActivada = false;
-        
-        // Audio
-        let audioContext = null;
-        let sonidosHabilitados = false;
+    // ============================================
+    // INICIALIZACIÓN FIREBASE
+    // ============================================
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    
+    // Variables de estado
+    let firebaseDisponible = true;
+    let connectionStatus = document.getElementById('connectionStatus');
 
-        // ============================================
-        // ELEMENTOS DE LA INTERFAZ
-        // ============================================
-        const timerDisplay = document.getElementById('timer');
-        const phaseIndicator = document.getElementById('phaseIndicator');
-        const progressBar = document.getElementById('progressBar');
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const horasInput = document.getElementById('horasInput');
-        const minutosInput = document.getElementById('minutosInput');
-        const segundosInput = document.getElementById('segundosInput');
+    // ============================================
+    // VARIABLES DEL CRONÓMETRO Y ALARMAS
+    // ============================================
+    let tiempoTotal = 0;
+    let tiempoRestante = 0;
+    let intervalo = null;
+    let enEjecucion = false;
+    
+    // Variables para controlar alarmas en TODOS los dispositivos
+    let ultimoTiempoSincronizado = 0;
+    let alarmasEjecutadasLocalmente = {
+        alarma5min: false,
+        alarma3min: false,
+        alarma1min: false,
+        alarmaFinal: false
+    };
+    
+    // Audio
+    let audioContext = null;
+    let sonidosHabilitados = false;
 
-        // ============================================
-        // FUNCIONES DE CONEXIÓN
-        // ============================================
-        function actualizarEstadoConexion(conectado, mensaje) {
-            if (conectado) {
-                connectionStatus.className = "connection-status connection-online";
-                connectionStatus.innerHTML = `<i class="fas fa-wifi"></i> ${mensaje}`;
-            } else {
-                connectionStatus.className = "connection-status connection-offline";
-                connectionStatus.innerHTML = `<i class="fas fa-wifi-slash"></i> ${mensaje}`;
+    // ============================================
+    // ELEMENTOS DE LA INTERFAZ
+    // ============================================
+    const timerDisplay = document.getElementById('timer');
+    const phaseIndicator = document.getElementById('phaseIndicator');
+    const progressBar = document.getElementById('progressBar');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const horasInput = document.getElementById('horasInput');
+    const minutosInput = document.getElementById('minutosInput');
+    const segundosInput = document.getElementById('segundosInput');
+
+    // ============================================
+    // FUNCIONES DE CONEXIÓN
+    // ============================================
+    function actualizarEstadoConexion(conectado, mensaje) {
+        if (conectado) {
+            connectionStatus.className = "connection-status connection-online";
+            connectionStatus.innerHTML = `<i class="fas fa-wifi"></i> ${mensaje}`;
+        } else {
+            connectionStatus.className = "connection-status connection-offline";
+            connectionStatus.innerHTML = `<i class="fas fa-wifi-slash"></i> ${mensaje}`;
+        }
+    }
+
+    function configurarMonitoreoConexion() {
+        db.ref(".info/connected").on("value", function(snap) {
+            firebaseDisponible = snap.val() === true;
+            actualizarEstadoConexion(firebaseDisponible, firebaseDisponible ? "CONECTADO" : "DESCONECTADO");
+        });
+    }
+
+    // ============================================
+    // SISTEMA DE AUDIO MEJORADO
+    // ============================================
+    function inicializarAudio() {
+        try {
+            // Crear contexto de audio
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            sonidosHabilitados = true;
+            console.log("🔊 Sistema de audio inicializado correctamente");
+            
+            // Activar audio inmediatamente para evitar problemas con Chrome/Edge
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            return true;
+        } catch (error) {
+            console.warn("⚠️ No se pudo inicializar el audio:", error);
+            sonidosHabilitados = false;
+            return false;
+        }
+    }
+
+    // Función para activar audio en dispositivos móviles
+    function activarAudioEnMovil() {
+        if (!sonidosHabilitados || !audioContext) {
+            const activado = inicializarAudio();
+            if (activado) {
+                console.log("🔊 Audio activado manualmente");
             }
         }
+    }
 
-        function configurarMonitoreoConexion() {
-            db.ref(".info/connected").on("value", function(snap) {
-                firebaseDisponible = snap.val() === true;
-                actualizarEstadoConexion(firebaseDisponible, firebaseDisponible ? "CONECTADO" : "DESCONECTADO");
+    // Función para reproducir alarmas con diferentes tonos
+    function reproducirAlarma(tipo) {
+        if (!sonidosHabilitados || !audioContext) return;
+        
+        try {
+            // Asegurar que el contexto de audio esté activo
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            const ahora = audioContext.currentTime;
+            
+            // Configurar según el tipo de alarma
+            switch(tipo) {
+                case '5min':
+                    oscillator.frequency.value = 440; // La nota A4
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0, ahora);
+                    gainNode.gain.linearRampToValueAtTime(0.8, ahora + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 2.0);
+                    oscillator.start(ahora);
+                    oscillator.stop(ahora + 2.0);
+                    break;
+                    
+                case '3min':
+                    oscillator.frequency.value = 523.25; // La nota C5
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0, ahora);
+                    gainNode.gain.linearRampToValueAtTime(0.8, ahora + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 1.5);
+                    oscillator.start(ahora);
+                    oscillator.stop(ahora + 1.5);
+                    break;
+                    
+                case '1min':
+                    oscillator.frequency.value = 659.25; // La nota E5
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0, ahora);
+                    gainNode.gain.linearRampToValueAtTime(0.8, ahora + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 1.0);
+                    oscillator.start(ahora);
+                    oscillator.stop(ahora + 1.0);
+                    break;
+                    
+                case 'critico':
+                    // Pitido rápido para últimos 5 segundos
+                    oscillator.frequency.value = 880; // La nota A5
+                    oscillator.type = 'square';
+                    gainNode.gain.setValueAtTime(0, ahora);
+                    gainNode.gain.linearRampToValueAtTime(0.6, ahora + 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 0.2);
+                    oscillator.start(ahora);
+                    oscillator.stop(ahora + 0.2);
+                    break;
+                    
+                case 'final':
+                    // Alarma final más larga
+                    oscillator.frequency.value = 349.23; // La nota F4
+                    oscillator.type = 'sawtooth';
+                    gainNode.gain.setValueAtTime(0, ahora);
+                    gainNode.gain.linearRampToValueAtTime(1.0, ahora + 0.2);
+                    gainNode.gain.setValueAtTime(1.0, ahora + 1.5);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 3.0);
+                    oscillator.start(ahora);
+                    oscillator.stop(ahora + 3.0);
+                    break;
+            }
+            
+            console.log(`🔔 Alarma ${tipo} reproducida`);
+            
+        } catch (error) {
+            console.warn("Error al reproducir alarma:", error);
+        }
+    }
+
+    // ============================================
+    // FUNCIONES DEL CRONÓMETRO CON SISTEMA DE ALARMAS
+    // ============================================
+    function calcularTiempoTotal() {
+        const horas = parseInt(horasInput.value) || 0;
+        const minutos = parseInt(minutosInput.value) || 0;
+        const segundos = parseInt(segundosInput.value) || 0;
+        
+        return (horas * 3600) + (minutos * 60) + segundos;
+    }
+
+    function actualizarDisplay() {
+        const horas = Math.floor(tiempoRestante / 3600);
+        const minutos = Math.floor((tiempoRestante % 3600) / 60);
+        const segundos = tiempoRestante % 60;
+        
+        if (horas > 0) {
+            timerDisplay.textContent = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+        } else if (minutos > 0) {
+            timerDisplay.textContent = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+        } else {
+            timerDisplay.textContent = `00:${String(segundos).padStart(2, '0')}`;
+        }
+        
+        // Barra de progreso
+        let progreso = 0;
+        if (tiempoTotal > 0) {
+            progreso = ((tiempoTotal - tiempoRestante) / tiempoTotal) * 100;
+        }
+        progressBar.style.width = `${progreso}%`;
+        
+        // Estados visuales
+        if (tiempoRestante <= 5 && tiempoRestante > 0) {
+            timerDisplay.classList.add('tiempo-critico');
+            timerDisplay.classList.remove('tiempo-alerta');
+            phaseIndicator.className = "phase-indicator tiempo-critico";
+            phaseIndicator.textContent = "¡TIEMPO CRÍTICO!";
+            progressBar.style.background = 'linear-gradient(90deg, var(--accent-red), #e91e63)';
+        } else if (tiempoRestante <= 60 && tiempoRestante > 0) {
+            timerDisplay.classList.add('tiempo-alerta');
+            timerDisplay.classList.remove('tiempo-critico');
+            phaseIndicator.className = "phase-indicator tiempo-alerta";
+            phaseIndicator.textContent = "TIEMPO DE ALERTA";
+            progressBar.style.background = 'linear-gradient(90deg, var(--accent-orange), var(--accent-red))';
+        } else {
+            timerDisplay.classList.remove('tiempo-critico', 'tiempo-alerta');
+            progressBar.style.background = 'linear-gradient(90deg, var(--accent-green), var(--accent-blue))';
+            
+            if (enEjecucion) {
+                phaseIndicator.className = "phase-indicator en-ejecucion";
+                phaseIndicator.textContent = "CRONÓMETRO EN EJECUCIÓN";
+            } else {
+                phaseIndicator.className = "phase-indicator detenido";
+                phaseIndicator.textContent = "CRONÓMETRO DETENIDO";
+            }
+        }
+    }
+
+    // Función para verificar y ejecutar alarmas en TODOS los dispositivos
+    function verificarAlarmas(tiempoAnterior, tiempoActual) {
+        if (!sonidosHabilitados) return;
+        
+        const alerta5min = 5 * 60;  // 300 segundos
+        const alerta3min = 3 * 60;  // 180 segundos
+        const alerta1min = 1 * 60;  // 60 segundos
+        
+        // Verificar si pasamos por un umbral de alarma
+        // 5 minutos
+        if (tiempoAnterior > alerta5min && tiempoActual <= alerta5min && tiempoTotal > alerta5min) {
+            if (!alarmasEjecutadasLocalmente.alarma5min) {
+                reproducirAlarma('5min');
+                alarmasEjecutadasLocalmente.alarma5min = true;
+                console.log("🔔 Alarma de 5 minutos activada");
+            }
+        }
+        
+        // 3 minutos
+        if (tiempoAnterior > alerta3min && tiempoActual <= alerta3min && tiempoTotal > alerta3min) {
+            if (!alarmasEjecutadasLocalmente.alarma3min) {
+                reproducirAlarma('3min');
+                alarmasEjecutadasLocalmente.alarma3min = true;
+                console.log("🔔 Alarma de 3 minutos activada");
+            }
+        }
+        
+        // 1 minuto
+        if (tiempoAnterior > alerta1min && tiempoActual <= alerta1min && tiempoTotal > alerta1min) {
+            if (!alarmasEjecutadasLocalmente.alarma1min) {
+                reproducirAlarma('1min');
+                alarmasEjecutadasLocalmente.alarma1min = true;
+                console.log("🔔 Alarma de 1 minuto activada");
+            }
+        }
+        
+        // Últimos 5 segundos (pitido cada segundo)
+        if (tiempoActual <= 5 && tiempoActual > 0 && tiempoTotal > 5) {
+            reproducirAlarma('critico');
+        }
+        
+        // Alarma final (cuando llega a 0)
+        if (tiempoAnterior > 0 && tiempoActual === 0 && tiempoTotal > 0) {
+            if (!alarmasEjecutadasLocalmente.alarmaFinal) {
+                setTimeout(() => {
+                    reproducirAlarma('final');
+                }, 300);
+                alarmasEjecutadasLocalmente.alarmaFinal = true;
+                console.log("🔔 Alarma final activada");
+            }
+        }
+    }
+
+    function iniciar() {
+        tiempoTotal = calcularTiempoTotal();
+        
+        if (tiempoTotal === 0) {
+            alert("⚠️ Configura un tiempo mayor a 0 antes de iniciar");
+            return;
+        }
+        
+        tiempoRestante = tiempoTotal;
+        enEjecucion = true;
+        
+        // Reiniciar control de alarmas
+        alarmasEjecutadasLocalmente = {
+            alarma5min: false,
+            alarma3min: false,
+            alarma1min: false,
+            alarmaFinal: false
+        };
+        
+        // Asegurar audio activado
+        activarAudioEnMovil();
+        
+        // Sincronizar con Firebase
+        if (firebaseDisponible) {
+            db.ref("cronometro").set({
+                enEjecucion: true,
+                tiempoTotal: tiempoTotal,
+                tiempoRestante: tiempoRestante,
+                ultimaAlarma5min: false,
+                ultimaAlarma3min: false,
+                ultimaAlarma1min: false,
+                ultimaAlarmaFinal: false,
+                timestamp: Date.now()
             });
         }
-
-        // ============================================
-        // FUNCIONES DEL CRONÓMETRO
-        // ============================================
-        function calcularTiempoTotal() {
-            const horas = parseInt(horasInput.value) || 0;
-            const minutos = parseInt(minutosInput.value) || 0;
-            const segundos = parseInt(segundosInput.value) || 0;
-            
-            return (horas * 3600) + (minutos * 60) + segundos;
-        }
-
-        function actualizarDisplay() {
-            const horas = Math.floor(tiempoRestante / 3600);
-            const minutos = Math.floor((tiempoRestante % 3600) / 60);
-            const segundos = tiempoRestante % 60;
-            
-            if (horas > 0) {
-                timerDisplay.textContent = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
-            } else if (minutos > 0) {
-                timerDisplay.textContent = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
-            } else {
-                timerDisplay.textContent = `00:${String(segundos).padStart(2, '0')}`;
-            }
-            
-            // Barra de progreso
-            let progreso = 0;
-            if (tiempoTotal > 0) {
-                progreso = ((tiempoTotal - tiempoRestante) / tiempoTotal) * 100;
-            }
-            progressBar.style.width = `${progreso}%`;
-            
-            // Estados visuales
-            if (tiempoRestante <= 5 && tiempoRestante > 0) {
-                timerDisplay.classList.add('tiempo-critico');
-                timerDisplay.classList.remove('tiempo-alerta');
-                phaseIndicator.className = "phase-indicator tiempo-critico";
-                phaseIndicator.textContent = "¡TIEMPO CRÍTICO!";
-                progressBar.style.background = 'linear-gradient(90deg, var(--accent-red), #e91e63)';
-            } else if (tiempoRestante <= 60 && tiempoRestante > 0) {
-                timerDisplay.classList.add('tiempo-alerta');
-                timerDisplay.classList.remove('tiempo-critico');
-                phaseIndicator.className = "phase-indicator tiempo-alerta";
-                phaseIndicator.textContent = "TIEMPO DE ALERTA";
-                progressBar.style.background = 'linear-gradient(90deg, var(--accent-orange), var(--accent-red))';
-            } else {
-                timerDisplay.classList.remove('tiempo-critico', 'tiempo-alerta');
-                progressBar.style.background = 'linear-gradient(90deg, var(--accent-green), var(--accent-blue))';
+        
+        habilitarControles(false, true, true);
+        deshabilitarInputs(true);
+        
+        // Iniciar intervalo
+        clearInterval(intervalo);
+        ultimoTiempoSincronizado = tiempoRestante;
+        
+        intervalo = setInterval(() => {
+            if (tiempoRestante > 0) {
+                const tiempoAnterior = tiempoRestante;
+                tiempoRestante--;
                 
-                if (enEjecucion) {
-                    phaseIndicator.className = "phase-indicator en-ejecucion";
-                    phaseIndicator.textContent = "CRONÓMETRO EN EJECUCIÓN";
-                } else {
-                    phaseIndicator.className = "phase-indicator detenido";
-                    phaseIndicator.textContent = "CRONÓMETRO DETENIDO";
+                // Verificar alarmas en este dispositivo
+                verificarAlarmas(tiempoAnterior, tiempoRestante);
+                
+                actualizarDisplay();
+                
+                // Sincronizar tiempo restante
+                if (firebaseDisponible) {
+                    db.ref("cronometro").update({ 
+                        tiempoRestante: tiempoRestante,
+                        timestamp: Date.now()
+                    });
                 }
-            }
-        }
-
-        function iniciar() {
-            tiempoTotal = calcularTiempoTotal();
-            
-            if (tiempoTotal === 0) {
-                alert("⚠️ Configura un tiempo mayor a 0 antes de iniciar");
-                return;
-            }
-            
-            tiempoRestante = tiempoTotal;
-            enEjecucion = true;
-            
-            // Sincronizar con Firebase
-            if (firebaseDisponible) {
-                db.ref("cronometro").set({
-                    enEjecucion: true,
-                    tiempoTotal: tiempoTotal,
-                    tiempoRestante: tiempoRestante,
-                    alerta5min: false,
-                    alerta3min: false,
-                    alerta1min: false
-                });
-            }
-            
-            habilitarControles(false, true, true);
-            deshabilitarInputs(true);
-            
-            // Iniciar intervalo
-            clearInterval(intervalo);
-            intervalo = setInterval(() => {
-                if (tiempoRestante > 0) {
-                    tiempoRestante--;
-                    actualizarDisplay();
+                
+                if (tiempoRestante === 0) {
+                    clearInterval(intervalo);
+                    enEjecucion = false;
+                    habilitarControles(true, false, true);
+                    deshabilitarInputs(false);
                     
-                    // Sincronizar tiempo restante
                     if (firebaseDisponible) {
-                        db.ref("cronometro").update({ tiempoRestante: tiempoRestante });
-                    }
-                    
-                    if (tiempoRestante === 0) {
-                        clearInterval(intervalo);
-                        enEjecucion = false;
-                        habilitarControles(true, false, true);
-                        deshabilitarInputs(false);
-                        
-                        if (firebaseDisponible) {
-                            db.ref("cronometro").update({ enEjecucion: false });
-                        }
-                        
-                        // Sonido al terminar
-                        reproducirAlarmaFinal();
+                        db.ref("cronometro").update({ 
+                            enEjecucion: false,
+                            ultimaAlarmaFinal: true
+                        });
                     }
                 }
-            }, 1000);
-        }
-
-        function detener() {
-            clearInterval(intervalo);
-            enEjecucion = false;
-            
-            if (firebaseDisponible) {
-                db.ref("cronometro").update({ enEjecucion: false });
             }
-            
-            habilitarControles(true, false, true);
-            deshabilitarInputs(false);
-            actualizarDisplay();
-        }
+        }, 1000);
+    }
 
-        function reiniciar() {
-            clearInterval(intervalo);
-            enEjecucion = false;
-            tiempoTotal = calcularTiempoTotal();
-            tiempoRestante = tiempoTotal;
+    function detener() {
+        clearInterval(intervalo);
+        enEjecucion = false;
+        
+        if (firebaseDisponible) {
+            db.ref("cronometro").update({ enEjecucion: false });
+        }
+        
+        habilitarControles(true, false, true);
+        deshabilitarInputs(false);
+        actualizarDisplay();
+    }
+
+    function reiniciar() {
+        clearInterval(intervalo);
+        enEjecucion = false;
+        tiempoTotal = calcularTiempoTotal();
+        tiempoRestante = tiempoTotal;
+        
+        // Reiniciar control de alarmas
+        alarmasEjecutadasLocalmente = {
+            alarma5min: false,
+            alarma3min: false,
+            alarma1min: false,
+            alarmaFinal: false
+        };
+        
+        if (firebaseDisponible) {
+            db.ref("cronometro").set({
+                enEjecucion: false,
+                tiempoTotal: tiempoTotal,
+                tiempoRestante: tiempoRestante,
+                ultimaAlarma5min: false,
+                ultimaAlarma3min: false,
+                ultimaAlarma1min: false,
+                ultimaAlarmaFinal: false,
+                timestamp: Date.now()
+            });
+        }
+        
+        habilitarControles(true, false, true);
+        deshabilitarInputs(false);
+        actualizarDisplay();
+    }
+
+    function habilitarControles(iniciar, detener, reiniciar) {
+        startBtn.disabled = !iniciar;
+        stopBtn.disabled = !detener;
+        resetBtn.disabled = !reiniciar;
+    }
+
+    function deshabilitarInputs(deshabilitar) {
+        horasInput.disabled = deshabilitar;
+        minutosInput.disabled = deshabilitar;
+        segundosInput.disabled = deshabilitar;
+    }
+
+    // ============================================
+    // LISTENER DE FIREBASE CON SISTEMA DE ALARMAS
+    // ============================================
+    function configurarFirebaseListener() {
+        db.ref("cronometro").on("value", function(snapshot) {
+            const data = snapshot.val();
             
-            if (firebaseDisponible) {
+            if (!data) {
                 db.ref("cronometro").set({
                     enEjecucion: false,
-                    tiempoTotal: tiempoTotal,
-                    tiempoRestante: tiempoRestante,
-                    alerta5min: false,
-                    alerta3min: false,
-                    alerta1min: false
+                    tiempoTotal: 0,
+                    tiempoRestante: 0,
+                    ultimaAlarma5min: false,
+                    ultimaAlarma3min: false,
+                    ultimaAlarma1min: false,
+                    ultimaAlarmaFinal: false,
+                    timestamp: Date.now()
                 });
+                return;
             }
+
+            // Guardar tiempo anterior para verificar alarmas
+            const tiempoAnterior = tiempoRestante;
             
-            habilitarControles(true, false, true);
-            deshabilitarInputs(false);
-            actualizarDisplay();
-        }
-
-        function habilitarControles(iniciar, detener, reiniciar) {
-            startBtn.disabled = !iniciar;
-            stopBtn.disabled = !detener;
-            resetBtn.disabled = !reiniciar;
-        }
-
-        function deshabilitarInputs(deshabilitar) {
-            horasInput.disabled = deshabilitar;
-            minutosInput.disabled = deshabilitar;
-            segundosInput.disabled = deshabilitar;
-        }
-
-        // ============================================
-        // SISTEMA DE AUDIO
-        // ============================================
-        function inicializarAudio() {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                sonidosHabilitados = true;
-            } catch (e) {
-                sonidosHabilitados = false;
+            // Actualizar estado local
+            enEjecucion = data.enEjecucion || false;
+            tiempoTotal = data.tiempoTotal || 0;
+            tiempoRestante = data.tiempoRestante || 0;
+            
+            // Sincronizar inputs
+            const horas = Math.floor(tiempoTotal / 3600);
+            const minutos = Math.floor((tiempoTotal % 3600) / 60);
+            const segundos = tiempoTotal % 60;
+            
+            horasInput.value = horas;
+            minutosInput.value = minutos;
+            segundosInput.value = segundos;
+            
+            // Verificar alarmas basadas en el cambio de tiempo
+            if (tiempoAnterior !== tiempoRestante) {
+                verificarAlarmas(tiempoAnterior, tiempoRestante);
             }
-        }
-
-        function reproducirAlarmaFinal() {
-            if (!sonidosHabilitados) return;
-            try {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                oscillator.frequency.value = 800;
-                oscillator.type = 'sine';
-                const ahora = audioContext.currentTime;
-                gainNode.gain.setValueAtTime(0, ahora);
-                gainNode.gain.linearRampToValueAtTime(0.8, ahora + 0.1);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 1.5);
-                oscillator.start(ahora);
-                oscillator.stop(ahora + 1.5);
-            } catch (e) {}
-        }
-
-        // ============================================
-        // LISTENER DE FIREBASE
-        // ============================================
-        function configurarFirebaseListener() {
-            db.ref("cronometro").on("value", function(snapshot) {
-                const data = snapshot.val();
-                
-                if (!data) {
-                    db.ref("cronometro").set({
-                        enEjecucion: false,
-                        tiempoTotal: 0,
-                        tiempoRestante: 0,
-                        alerta5min: false,
-                        alerta3min: false,
-                        alerta1min: false
-                    });
-                    return;
-                }
-
-                // Actualizar estado local
-                enEjecucion = data.enEjecucion || false;
-                tiempoTotal = data.tiempoTotal || 0;
-                tiempoRestante = data.tiempoRestante || 0;
-                
-                // Sincronizar inputs
-                const horas = Math.floor(tiempoTotal / 3600);
-                const minutos = Math.floor((tiempoTotal % 3600) / 60);
-                const segundos = tiempoTotal % 60;
-                
-                horasInput.value = horas;
-                minutosInput.value = minutos;
-                segundosInput.value = segundos;
-                
-                // Actualizar interfaz
-                actualizarDisplay();
-                habilitarControles(!enEjecucion, enEjecucion, true);
-                deshabilitarInputs(enEjecucion);
-                
-                // Manejar intervalo local
-                clearInterval(intervalo);
-                if (enEjecucion && tiempoRestante > 0) {
-                    intervalo = setInterval(() => {
-                        if (tiempoRestante > 0) {
-                            tiempoRestante--;
-                            actualizarDisplay();
-                            
-                            if (tiempoRestante === 0) {
-                                clearInterval(intervalo);
-                                enEjecucion = false;
-                                habilitarControles(true, false, true);
-                                deshabilitarInputs(false);
-                            }
-                        }
-                    }, 1000);
-                }
-            });
-        }
-
-        // ============================================
-        // INICIALIZACIÓN
-        // ============================================
-        function inicializar() {
-            // Configurar monitoreo de conexión
-            configurarMonitoreoConexion();
-            
-            // Configurar listener de Firebase
-            configurarFirebaseListener();
-            
-            // Configurar tiempo inicial
-            horasInput.value = 0;
-            minutosInput.value = 0;
-            segundosInput.value = 0;
-            tiempoTotal = 0;
-            tiempoRestante = 0;
             
             // Actualizar interfaz
             actualizarDisplay();
-            habilitarControles(true, false, true);
+            habilitarControles(!enEjecucion, enEjecucion, true);
+            deshabilitarInputs(enEjecucion);
             
-            // Inicializar audio
-            inicializarAudio();
-            
-            // Activar audio al primer clic
-            document.addEventListener('click', function() {
-                if (!sonidosHabilitados) {
-                    inicializarAudio();
-                }
-            }, { once: true });
-            
-            // Configurar event listeners
-            horasInput.addEventListener('input', () => {
-                if (!enEjecucion) {
-                    tiempoTotal = calcularTiempoTotal();
-                    tiempoRestante = tiempoTotal;
-                    actualizarDisplay();
-                }
-            });
-            
-            minutosInput.addEventListener('input', () => {
-                if (!enEjecucion) {
-                    tiempoTotal = calcularTiempoTotal();
-                    tiempoRestante = tiempoTotal;
-                    actualizarDisplay();
-                }
-            });
-            
-            segundosInput.addEventListener('input', () => {
-                if (!enEjecucion) {
-                    tiempoTotal = calcularTiempoTotal();
-                    tiempoRestante = tiempoTotal;
-                    actualizarDisplay();
-                }
-            });
-            
-            startBtn.addEventListener('click', iniciar);
-            stopBtn.addEventListener('click', detener);
-            resetBtn.addEventListener('click', reiniciar);
-            
-            console.log("✅ Cronómetro listo para usar");
-        }
+            // Manejar intervalo local
+            clearInterval(intervalo);
+            if (enEjecucion && tiempoRestante > 0) {
+                intervalo = setInterval(() => {
+                    if (tiempoRestante > 0) {
+                        const tiempoAnteriorLocal = tiempoRestante;
+                        tiempoRestante--;
+                        
+                        // Verificar alarmas en el intervalo local
+                        verificarAlarmas(tiempoAnteriorLocal, tiempoRestante);
+                        
+                        actualizarDisplay();
+                        
+                        if (tiempoRestante === 0) {
+                            clearInterval(intervalo);
+                            enEjecucion = false;
+                            habilitarControles(true, false, true);
+                            deshabilitarInputs(false);
+                        }
+                    }
+                }, 1000);
+            }
+        });
+    }
 
-        // Iniciar cuando la página cargue
-        window.addEventListener('load', inicializar);
-    </script>
+    // ============================================
+    // INICIALIZACIÓN COMPLETA
+    // ============================================
+    function inicializar() {
+        // Configurar monitoreo de conexión
+        configurarMonitoreoConexion();
+        
+        // Inicializar sistema de audio
+        const audioInicializado = inicializarAudio();
+        if (!audioInicializado) {
+            console.warn("⚠️ El sistema de audio no pudo inicializarse automáticamente");
+            console.warn("⚠️ Haz clic en cualquier parte de la pantalla para activar el audio");
+        }
+        
+        // Configurar listener de Firebase
+        configurarFirebaseListener();
+        
+        // Configurar tiempo inicial
+        horasInput.value = 0;
+        minutosInput.value = 0;
+        segundosInput.value = 0;
+        tiempoTotal = 0;
+        tiempoRestante = 0;
+        
+        // Actualizar interfaz
+        actualizarDisplay();
+        habilitarControles(true, false, true);
+        
+        // Configurar evento para activar audio manualmente
+        document.addEventListener('click', function() {
+            activarAudioEnMovil();
+        });
+        
+        // Configurar event listeners para los inputs
+        horasInput.addEventListener('input', () => {
+            if (!enEjecucion) {
+                tiempoTotal = calcularTiempoTotal();
+                tiempoRestante = tiempoTotal;
+                actualizarDisplay();
+            }
+        });
+        
+        minutosInput.addEventListener('input', () => {
+            if (!enEjecucion) {
+                tiempoTotal = calcularTiempoTotal();
+                tiempoRestante = tiempoTotal;
+                actualizarDisplay();
+            }
+        });
+        
+        segundosInput.addEventListener('input', () => {
+            if (!enEjecucion) {
+                tiempoTotal = calcularTiempoTotal();
+                tiempoRestante = tiempoTotal;
+                actualizarDisplay();
+            }
+        });
+        
+        // Configurar event listeners para los botones
+        startBtn.addEventListener('click', iniciar);
+        stopBtn.addEventListener('click', detener);
+        resetBtn.addEventListener('click', reiniciar);
+        
+        console.log("✅ Cronómetro con sistema de alarmas listo para usar");
+    }
+
+    // Iniciar cuando la página cargue
+    window.addEventListener('load', inicializar);
+</script>
 </body>
 </html>
+
